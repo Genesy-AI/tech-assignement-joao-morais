@@ -16,6 +16,11 @@ export const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
 }
+// This ensures correct format.
+// For production, I’d use a library like i18n-iso-countries to validate against the actual ISO 3166 list.
+export function isValidCountryCodeFormat(code: string) {
+  return /^[A-Z]{2}$/.test(code)
+}
 
 export const parseCsv = (content: string): CsvLead[] => {
   if (!content?.trim()) {
@@ -68,7 +73,7 @@ export const parseCsv = (content: string): CsvLead[] => {
           lead.jobTitle = trimmedValue || undefined
           break
         case 'countrycode':
-          lead.countryCode = trimmedValue || undefined
+          lead.countryCode = (isValidCountryCodeFormat(trimmedValue) && trimmedValue )|| undefined
           break
         case 'companyname':
           lead.companyName = trimmedValue || undefined
