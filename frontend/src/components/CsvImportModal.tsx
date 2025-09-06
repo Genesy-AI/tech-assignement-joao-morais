@@ -4,6 +4,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { api } from '../api'
 import { CsvLead, parseCsv } from '../utils/csvParser'
+import { availableFields, enrichLead } from '../utils/availableFields'
+
+const { keys: fieldsKeys, labels: fieldsLabels } = availableFields
+
+const csvImportModalTableLabels = ['Row', 'Status', ...fieldsLabels.filter(item => item !== 'Message' && item !== 'Created'), 'Errors']
+const csvImportModalTableKeys = [...fieldsKeys.filter(item => item !== 'message' && item !== 'createdAt'), 'errors']
 
 interface CsvImportModalProps {
   isOpen: boolean
@@ -41,6 +47,8 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
       duplicatesInCsv: duplicatesInCsv.length,
     }
   }, [csvData])
+
+  const enrichedCsvData = useMemo(() => csvData.map((item) => ({...item, ...enrichLead(item)})), [csvData])
 
   const handleFileSelect = (file: File) => {
     if (!file.name.endsWith('.csv')) {
@@ -92,7 +100,6 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
   const importMutation = useMutation({
     mutationFn: async (leads: CsvLead[]) => {
       const validLeads = leads.filter((lead) => lead.isValid)
-
       const leadsToImport = validLeads.map((lead) => ({
         firstName: lead.firstName,
         lastName: lead.lastName,
@@ -100,6 +107,8 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
         jobTitle: lead.jobTitle || undefined,
         countryCode: lead.countryCode || undefined,
         companyName: lead.companyName || undefined,
+        phoneNumber: lead.phoneNumber || undefined,
+        yearsInRole: lead.yearsInRole || undefined,
       }))
 
       return api.leads.bulkImport({ leads: leadsToImport })
@@ -162,6 +171,8 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
       document.body.style.overflow = 'unset'
     }
   }, [isOpen, handleClose])
+
+  console.log({ csvImportModalTableKeys, enrichedCsvData })
 
   if (!isOpen) return null
 
@@ -271,8 +282,13 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50 sticky top-0">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Row</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      {/* <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Row</th> */}
+                      {csvImportModalTableLabels.map((label) => (
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                          {label}
+                        </th>
+                      ))}
+                      {/* <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         Status
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
@@ -286,11 +302,11 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         Errors
-                      </th>
+                      </th> */}
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {csvData.map((lead, index) => (
+                    {enrichedCsvData.map((lead, index) => (
                       <tr key={index} className={lead.isValid ? 'bg-white' : 'bg-red-50'}>
                         <td className="px-3 py-2 text-sm text-gray-900">{lead.rowIndex - 1}</td>
                         <td className="px-3 py-2">
@@ -304,12 +320,12 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
                             </span>
                           )}
                         </td>
-                        <td className="px-3 py-2 text-sm text-gray-900">
-                          {lead.firstName} {lead.lastName || ''}
-                        </td>
-                        <td className="px-3 py-2 text-sm text-gray-900">{lead.email || '-'}</td>
+                        {csvImportModalTableKeys.map((key) => (
+                          <td className="px-3 py-2 text-sm text-gray-900">{lead[key as keyof CsvLead]}</td>
+                        ))}
+                        {/* <td className="px-3 py-2 text-sm text-gray-900">{lead.email || '-'}</td>
                         <td className="px-3 py-2 text-sm text-gray-900">{lead.companyName || '-'}</td>
-                        <td className="px-3 py-2 text-sm text-red-600">{lead.errors.join(', ') || '-'}</td>
+                        <td className="px-3 py-2 text-sm text-red-600">{lead.errors.join(', ') || '-'}</td> */}
                       </tr>
                     ))}
                   </tbody>

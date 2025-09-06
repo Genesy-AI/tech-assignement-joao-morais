@@ -9,4 +9,6 @@ CREATE TABLE "lead" (
     "jobTitle" TEXT,
     "countryCode" TEXT,
     "companyName" TEXT
+    "phoneNumber" TEXT
+    "yearsInRole" TEXT
 );

@@ -7,6 +7,8 @@ export interface CsvLead {
   jobTitle?: string
   countryCode?: string
   companyName?: string
+  phoneNumber?: string
+  yearsInRole?: string
   isValid: boolean
   errors: string[]
   rowIndex: number
@@ -34,7 +36,7 @@ export const parseCsv = (content: string): CsvLead[] => {
     transformHeader: (header) => header.trim().toLowerCase(),
     quoteChar: '"',
   })
-
+  
   if (parseResult.errors.length > 0) {
     const criticalErrors = parseResult.errors.filter(
       (error) => error.type === 'Delimiter' || error.type === 'Quotes' || error.type === 'FieldMismatch'
@@ -73,10 +75,16 @@ export const parseCsv = (content: string): CsvLead[] => {
           lead.jobTitle = trimmedValue || undefined
           break
         case 'countrycode':
-          lead.countryCode = (isValidCountryCodeFormat(trimmedValue) && trimmedValue )|| undefined
+          lead.countryCode = trimmedValue|| undefined
           break
         case 'companyname':
           lead.companyName = trimmedValue || undefined
+          break
+        case 'phonenumber':
+          lead.phoneNumber = trimmedValue || undefined
+          break
+        case 'yearsinrole':
+          lead.yearsInRole = trimmedValue || undefined
           break
       }
     })
@@ -92,8 +100,9 @@ export const parseCsv = (content: string): CsvLead[] => {
       errors.push('Email is required')
     } else if (!isValidEmail(lead.email)) {
       errors.push('Invalid email format')
+    } else if (lead.countryCode && !isValidCountryCodeFormat(lead.countryCode)) {
+      errors.push('Invalid country code format')
     }
-
     data.push({
       ...lead,
       firstName: lead.firstName || '',

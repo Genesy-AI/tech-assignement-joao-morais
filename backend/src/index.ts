@@ -189,7 +189,6 @@ app.post('/leads/bulk', async (req: Request, res: Response) => {
         lead.email.trim()
       )
     })
-
     if (validLeads.length === 0) {
       return res
         .status(400)
@@ -203,7 +202,6 @@ app.post('/leads/bulk', async (req: Request, res: Response) => {
         })),
       },
     })
-
     const leadKeys = new Set(
       existingLeads.map((lead) => `${lead.firstName.toLowerCase()}_${(lead.lastName || '').toLowerCase()}`)
     )
@@ -226,6 +224,8 @@ app.post('/leads/bulk', async (req: Request, res: Response) => {
             jobTitle: lead.jobTitle ? lead.jobTitle.trim() : null,
             countryCode: lead.countryCode ? lead.countryCode.trim() : null,
             companyName: lead.companyName ? lead.companyName.trim() : null,
+            phoneNumber: lead.phoneNumber ? lead.phoneNumber.trim() : null,
+            yearsInRole: lead.yearsInRole ? lead.yearsInRole.trim() : null,
           },
         })
         importedCount++

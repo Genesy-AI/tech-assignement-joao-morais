@@ -18,9 +18,11 @@ CREATE TABLE "new_lead" (
     "jobTitle" TEXT,
     "countryCode" TEXT,
     "companyName" TEXT,
+    "phoneNumber" TEXT,
+    "yearsInRole" TEXT,
     "message" TEXT
 );
-INSERT INTO "new_lead" ("companyName", "countryCode", "createdAt", "email", "firstName", "id", "jobTitle", "lastName", "message", "updatedAt") SELECT "companyName", "countryCode", "createdAt", "email", "firstName", "id", "jobTitle", "lastName", "message", "updatedAt" FROM "lead";
+INSERT INTO "new_lead" ("companyName", "countryCode", "createdAt", "email", "firstName", "id", "jobTitle", "lastName", "phoneNumber","yearsInRole", "message", "updatedAt") SELECT "companyName", "countryCode", "createdAt", "email", "firstName", "id", "jobTitle", "lastName", "phoneNumber", "yearsInRole", "message", "updatedAt" FROM "lead";
 DROP TABLE "lead";
 ALTER TABLE "new_lead" RENAME TO "lead";
 PRAGMA foreign_keys=ON;
