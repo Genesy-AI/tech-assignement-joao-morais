@@ -137,7 +137,6 @@ app.post('/leads/generate-messages', async (req: Request, res: Response) => {
     for (const lead of leads) {
       try {
         const message = generateMessageFromTemplate(template, lead)
-
         await prisma.lead.update({
           where: { id: lead.id },
           data: { message },
@@ -236,6 +235,29 @@ app.post('/leads/bulk', async (req: Request, res: Response) => {
         })
       }
     }
+
+    // for (const lead of existingLeads) {
+    //   try {
+    //     await prisma.lead.update({
+    //       where: { id: lead.id },
+    //       data: {
+    //         firstName: lead.firstName.trim(),
+    //         lastName: lead.lastName.trim(),
+    //         email: lead.email.trim(),
+    //         jobTitle: lead.jobTitle ? lead.jobTitle.trim() : null,
+    //         countryCode: lead.countryCode ? lead.countryCode.trim() : null,
+    //         companyName: lead.companyName ? lead.companyName.trim() : null,
+    //         phoneNumber: lead.phoneNumber ? lead.phoneNumber.trim() : null,
+    //         yearsInRole: lead.yearsInRole ? lead.yearsInRole.trim() : null,
+    //       },
+    //     })
+    //   } catch (error) {
+    //     errors.push({
+    //       lead: lead,
+    //       error: error instanceof Error ? error.message : 'Unknown error',
+    //     })
+    //   }
+    // }
 
     res.json({
       success: true,

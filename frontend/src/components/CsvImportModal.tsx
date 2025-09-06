@@ -172,8 +172,6 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
     }
   }, [isOpen, handleClose])
 
-  console.log({ csvImportModalTableKeys, enrichedCsvData })
-
   if (!isOpen) return null
 
   const modalContent = (

@@ -6,7 +6,7 @@ import { MessageTemplateModal } from './MessageTemplateModal'
 import { CsvImportModal } from './CsvImportModal'
 import { availableFields, enrichLead } from '../utils/availableFields'
 
-const {keys: fieldsKeys, labels: fieldsLabels} = availableFields
+const { keys: fieldsKeys, labels: fieldsLabels } = availableFields
 
 export const LeadsList: FC = () => {
   const [selectedLeads, setSelectedLeads] = useState<number[]>([])
@@ -71,9 +71,9 @@ export const LeadsList: FC = () => {
     )
   }
 
-  const isAllSelected = enrichedLeads.length && selectedLeads.length === enrichedLeads.length
+  const isAllSelected = enrichedLeads?.length && selectedLeads.length === enrichedLeads.length
   const isIndeterminate = selectedLeads.length > 0 && selectedLeads.length < (leads.data?.length || 0)
-  
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-[calc(100vh-12rem)]">
       <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
@@ -268,7 +268,7 @@ export const LeadsList: FC = () => {
                 </th>
                 {fieldsLabels.map((label) => (
                   <th
-                  key={label}
+                    key={label}
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 whitespace-nowrap"
                   >
@@ -279,7 +279,7 @@ export const LeadsList: FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {!leads.isError &&
-                enrichedLeads.map((lead) => (
+                enrichedLeads?.map((lead) => (
                   <tr
                     key={lead.id}
                     className={`hover:bg-gray-50 transition-colors ${
@@ -296,9 +296,7 @@ export const LeadsList: FC = () => {
                     </td>
                     {fieldsKeys.map((key) => (
                       <td className="px-6 py-4 whitespace-nowrap" key={key}>
-                        <div className="text-sm font-medium text-gray-900">
-                          {lead[key] ?? '-'}
-                        </div>
+                        <div className="text-sm font-medium text-gray-900">{lead[key] ?? '-'}</div>
                       </td>
                     ))}
                   </tr>

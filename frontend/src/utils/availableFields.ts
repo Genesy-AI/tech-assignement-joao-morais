@@ -40,7 +40,7 @@ export const enrichLead = (lead: any) => ({
   jobTitle: lead.jobTitle,
   companyName: lead.companyName,
   countryCode: lead.countryCode,
-  message: lead.name,
+  message: lead.message,
   phoneNumber: lead.phoneNumber,
   yearsInRole: lead.yearsInRole,
   linkedinProfile: lead.linkedinProfile,

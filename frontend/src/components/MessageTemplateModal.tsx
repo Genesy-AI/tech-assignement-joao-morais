@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { api } from '../api'
+import { MessageTemplateModalFieldsDropdown } from './messageTemplateModal/MessageTemplateModalFieldsDropdown'
 
 interface MessageTemplateModalProps {
   isOpen: boolean
@@ -62,7 +63,6 @@ export const MessageTemplateModal: FC<MessageTemplateModalProps> = ({
     e.preventDefault()
     if (template.trim() && selectedLeadIds.length > 0) {
       setGenerationResult(null)
-
       generateMessagesMutation.mutate({
         leadIds: selectedLeadIds,
         template: template.trim(),
@@ -105,8 +105,6 @@ export const MessageTemplateModal: FC<MessageTemplateModalProps> = ({
       document.body.style.overflow = 'unset'
     }
   }, [isOpen, handleClose])
-
-  const availableFields = ['firstName', 'lastName', 'email', 'jobTitle', 'companyName', 'countryCode']
 
   const insertField = (field: string) => {
     if (textareaRef.current) {
@@ -152,23 +150,16 @@ export const MessageTemplateModal: FC<MessageTemplateModalProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="message-template" className="block text-sm font-medium text-gray-700 mb-2">
-                Message Template
-              </label>
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
+              <div className="flex w-full flex-row justify-between pb-2 items-center">
+                <label htmlFor="message-template" className="block text-sm font-medium text-gray-700">
+                  Message Template
+                </label>
+                <div className="flex flex-wrap gap-2 items-center">
                   <span className="text-sm text-gray-600">Insert field:</span>
-                  {availableFields.map((field) => (
-                    <button
-                      key={field}
-                      type="button"
-                      onClick={() => insertField(field)}
-                      className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors"
-                    >
-                      {`{${field}}`}
-                    </button>
-                  ))}
+                  <MessageTemplateModalFieldsDropdown insertField={insertField} />
                 </div>
+              </div>
+              <div className="space-y-3">
                 <textarea
                   ref={textareaRef}
                   id="message-template"
