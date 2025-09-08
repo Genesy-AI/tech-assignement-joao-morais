@@ -72,7 +72,7 @@ export const MessageTemplateModalFieldsDropdown = ({
                 setOpen(false)
               }}
             >
-              {label}
+              {label} - ({`{${field}}`})
             </button>
           ))}
         </div>
