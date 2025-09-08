@@ -168,6 +168,17 @@ export async function bulkCreateOrUpdateByName(prisma: PrismaClient, leads: unkn
     }
   }
 
+  /**
+ * Summary returned by the endpoint.
+ *
+ * - createdCount: rows created from this upload (new in DB).
+ * - updatedCount: rows that matched one DB record and were updated.
+ * - invalidLeads: rows dropped due to missing/invalid required fields.
+ * - duplicatesInUpload: rows deduped because the CSV had duplicates (same key repeated).
+ * - ambiguousNameConflicts: rows skipped because (firstName+lastName) matched >1 DB rows.
+ * - duplicatesSkipped: (legacy) equals updatedCount + ambiguousNameConflicts.
+ * - importedCount: (legacy) alias for createdCount.
+ */
   return {
     status: 200 as const,
     body: {
