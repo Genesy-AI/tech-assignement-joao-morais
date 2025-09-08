@@ -9,6 +9,7 @@ export interface CsvLead {
   companyName?: string
   phoneNumber?: string
   yearsInRole?: string
+  linkedinProfile?: string
   isValid: boolean
   errors: string[]
   rowIndex: number
@@ -36,7 +37,7 @@ export const parseCsv = (content: string): CsvLead[] => {
     transformHeader: (header) => header.trim().toLowerCase(),
     quoteChar: '"',
   })
-  
+
   if (parseResult.errors.length > 0) {
     const criticalErrors = parseResult.errors.filter(
       (error) => error.type === 'Delimiter' || error.type === 'Quotes' || error.type === 'FieldMismatch'
@@ -56,7 +57,6 @@ export const parseCsv = (content: string): CsvLead[] => {
     if (Object.values(row).every((value) => !value)) return
 
     const lead: Partial<CsvLead> = { rowIndex: index + 2 }
-
     Object.entries(row).forEach(([header, value]) => {
       const normalizedHeader = header.toLowerCase().replace(/[^a-z]/g, '')
       const trimmedValue = value?.trim() || ''
@@ -75,7 +75,7 @@ export const parseCsv = (content: string): CsvLead[] => {
           lead.jobTitle = trimmedValue || undefined
           break
         case 'countrycode':
-          lead.countryCode = trimmedValue|| undefined
+          lead.countryCode = trimmedValue || undefined
           break
         case 'companyname':
           lead.companyName = trimmedValue || undefined
@@ -85,6 +85,9 @@ export const parseCsv = (content: string): CsvLead[] => {
           break
         case 'yearsinrole':
           lead.yearsInRole = trimmedValue || undefined
+          break
+        case 'linkedinprofile':
+          lead.linkedinProfile = trimmedValue || undefined
           break
       }
     })

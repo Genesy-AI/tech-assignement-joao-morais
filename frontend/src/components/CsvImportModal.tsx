@@ -117,6 +117,7 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
         companyName: lead.companyName || undefined,
         phoneNumber: lead.phoneNumber || undefined,
         yearsInRole: lead.yearsInRole || undefined,
+        linkedinProfile: lead.linkedinProfile || undefined,
       }))
 
       return api.leads.bulkImport({ leads: leadsToImport })
@@ -323,7 +324,7 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
                           )}
                         </td>
                         {csvImportModalTableKeys.map((key) => (
-                          <td className="px-3 py-2 text-sm text-gray-900 whitespace-nowrap">{lead[key as keyof CsvLead]}</td>
+                          <td className="px-3 py-2 text-sm text-gray-900 whitespace-nowrap">{lead[key as keyof CsvLead] || '-'}</td>
                         ))}
                       </tr>
                     ))}

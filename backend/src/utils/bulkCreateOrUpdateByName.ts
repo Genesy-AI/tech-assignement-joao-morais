@@ -9,6 +9,7 @@ export type IncomingLead = {
   companyName?: string | null
   phoneNumber?: string | null
   yearsInRole?: string | null
+  linkedinProfile?: string | null
 }
 
 type LeadCreateData = Prisma.leadCreateArgs['data'];
@@ -49,6 +50,7 @@ const buildCreateData = (lead: IncomingLead): LeadCreateData => ({
   companyName: sanitize(lead.companyName),
   phoneNumber: sanitize(lead.phoneNumber),
   yearsInRole: sanitize(lead.yearsInRole),
+  linkedinProfile: sanitize(lead.linkedinProfile),
 })
 
 const buildUpdateData = (lead: IncomingLead): LeadUpdateData => ({
@@ -60,6 +62,7 @@ const buildUpdateData = (lead: IncomingLead): LeadUpdateData => ({
   companyName: sanitize(lead.companyName),
   phoneNumber: sanitize(lead.phoneNumber),
   yearsInRole: sanitize(lead.yearsInRole),
+  linkedinProfile: sanitize(lead.linkedinProfile),
 })
 
 export async function bulkCreateOrUpdateByName(prisma: PrismaClient, leads: unknown) {

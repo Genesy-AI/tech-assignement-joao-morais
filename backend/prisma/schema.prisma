@@ -19,5 +19,6 @@ model lead {
   companyName String?
   phoneNumber String?
   yearsInRole String?
+  linkedinProfile String?
   message     String?
 }

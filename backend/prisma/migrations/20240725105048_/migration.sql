@@ -11,4 +11,5 @@ CREATE TABLE "lead" (
     "companyName" TEXT
     "phoneNumber" TEXT
     "yearsInRole" TEXT
+    "linkedinProfile" TEXT
 );

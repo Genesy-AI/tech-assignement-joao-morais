@@ -8,6 +8,7 @@ export interface LeadsBulkImportInput {
     companyName?: string
     phoneNumber?: string
     yearsInRole?: string
+    linkedinProfile?: string
   }[]
 }
 

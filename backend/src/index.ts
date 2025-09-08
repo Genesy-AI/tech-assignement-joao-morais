@@ -48,7 +48,6 @@ app.get('/leads/:id', async (req: Request, res: Response) => {
 
 app.get('/leads', async (req: Request, res: Response) => {
   const leads = await prisma.lead.findMany()
-
   res.json(leads)
 })
 
