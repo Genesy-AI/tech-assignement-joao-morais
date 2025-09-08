@@ -33,6 +33,33 @@ export function isValidCountryCodeFormat(code: string) {
   }
 }
 
+export function isValidLinkedinProfile(url: string) {
+  const linkedInRegex =
+    /^(https?:\/\/)?(www\.)?linkedin\.com\/(in\/[a-zA-Z0-9_-]+|company\/[a-zA-Z0-9_-]+)\/?$/
+  return linkedInRegex.test(url)
+}
+
+export function isSimpleValidPhone(raw?: string | null): boolean {
+  if (!raw) return false
+  let s = raw.trim()
+
+  // drop extension at end
+  s = s.replace(/(?:\s*(?:ext\.?|x|#)\s*\d{1,6})\s*$/i, "")
+
+  // convert international prefixes to +
+  s = s.replace(/^\s*011\s*/, "+").replace(/^\s*00\s*/, "+")
+
+  // remove common separators
+  s = s.replace(/[()\-\.\s]/g, "")
+
+  // keep only digits; allow one leading +
+  if (s.startsWith("+")) s = "+" + s.slice(1).replace(/\D/g, "")
+  else s = s.replace(/\D/g, "")
+
+  const body = s.startsWith("+") ? s.slice(1) : s
+  return body.length >= 7 && body.length <= 15 && /^\+?\d+$/.test(s)
+}
+
 export const parseCsv = (content: string): CsvLead[] => {
   if (!content?.trim()) {
     throw new Error('CSV content cannot be empty')
@@ -113,6 +140,10 @@ export const parseCsv = (content: string): CsvLead[] => {
       errors.push('Invalid email format')
     } else if (lead.countryCode && !isValidCountryCodeFormat(lead.countryCode)) {
       errors.push('Invalid country code format')
+    } else if (lead.linkedinProfile && !isValidLinkedinProfile(lead.linkedinProfile)) {
+      errors.push('Invalid linkedin url')
+    } else if (lead.phoneNumber && !isSimpleValidPhone(lead.phoneNumber)) {
+      errors.push('Invalid phone number format')
     }
     data.push({
       ...lead,

@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { parseCsv, isValidEmail, isValidCountryCodeFormat } from './csvParser'
+import {
+  parseCsv,
+  isValidEmail,
+  isValidCountryCodeFormat,
+  isValidLinkedinProfile,
+  isSimpleValidPhone,
+} from './csvParser'
 
 describe('isValidEmail', () => {
   it('should return true for valid email addresses', () => {
@@ -22,11 +28,11 @@ describe('isValidEmail', () => {
 
 describe('isValidCountryCodeFormat', () => {
   it('should return true for valid ISO country codes', () => {
-    expect(isValidCountryCodeFormat('US')).toBe(true)   // United States
-    expect(isValidCountryCodeFormat('BR')).toBe(true)   // Brazil
-    expect(isValidCountryCodeFormat('DE')).toBe(true)   // Germany
-    expect(isValidCountryCodeFormat('JP')).toBe(true)   // Japan
-    expect(isValidCountryCodeFormat('IN')).toBe(true)   // India
+    expect(isValidCountryCodeFormat('US')).toBe(true) // United States
+    expect(isValidCountryCodeFormat('BR')).toBe(true) // Brazil
+    expect(isValidCountryCodeFormat('DE')).toBe(true) // Germany
+    expect(isValidCountryCodeFormat('JP')).toBe(true) // Japan
+    expect(isValidCountryCodeFormat('IN')).toBe(true) // India
   })
 
   it('should be case-insensitive and normalize to uppercase', () => {
@@ -36,12 +42,87 @@ describe('isValidCountryCodeFormat', () => {
   })
 
   it('should return false for invalid codes', () => {
-    expect(isValidCountryCodeFormat('')).toBe(false)       // empty string
-    expect(isValidCountryCodeFormat('U')).toBe(false)      // single letter
-    expect(isValidCountryCodeFormat('USA')).toBe(false)    // three letters
-    expect(isValidCountryCodeFormat('ZZ')).toBe(false)     // not an assigned region
-    expect(isValidCountryCodeFormat('123')).toBe(false)    // numbers
-    expect(isValidCountryCodeFormat('@@')).toBe(false)     // special chars
+    expect(isValidCountryCodeFormat('')).toBe(false) // empty string
+    expect(isValidCountryCodeFormat('U')).toBe(false) // single letter
+    expect(isValidCountryCodeFormat('USA')).toBe(false) // three letters
+    expect(isValidCountryCodeFormat('ZZ')).toBe(false) // not an assigned region
+    expect(isValidCountryCodeFormat('123')).toBe(false) // numbers
+    expect(isValidCountryCodeFormat('@@')).toBe(false) // special chars
+  })
+})
+
+describe('isValidLinkedinProfile', () => {
+  expect(isValidLinkedinProfile('https://linkedin.com/in/john-doe')).toBe(true)
+  expect(isValidLinkedinProfile('https://linkedin.com/in/john-doe')).toBe(true)
+  expect(isValidLinkedinProfile('http://linkedin.com/in/jane_doe')).toBe(true)
+  expect(isValidLinkedinProfile('https://linkedin.com/in/john-doe/')).toBe(true)
+
+  expect(isValidLinkedinProfile('https://linkdin.com/in/john-doe')).toBe(false)
+  expect(isValidLinkedinProfile('https://linkedin.com')).toBe(false)
+  expect(isValidLinkedinProfile('https://github.com/john')).toBe(false)
+  expect(isValidLinkedinProfile('john-doe')).toBe(false)
+})
+
+describe('isSimpleValidPhone', () => {
+  it('rejects empty-ish values', () => {
+    expect(isSimpleValidPhone('')).toBe(false)
+    expect(isSimpleValidPhone('   ')).toBe(false)
+    expect(isSimpleValidPhone(null as unknown as string)).toBe(false)
+    expect(isSimpleValidPhone(undefined as unknown as string)).toBe(false)
+  })
+
+  it('accepts plain national numbers (7–15 digits)', () => {
+    expect(isSimpleValidPhone('7311239702')).toBe(true)
+    expect(isSimpleValidPhone('1601140330')).toBe(true)
+    expect(isSimpleValidPhone('8239784724')).toBe(true)
+    expect(isSimpleValidPhone('1234567')).toBe(true)
+    expect(isSimpleValidPhone('123456789012345')).toBe(true)
+  })
+
+  it('rejects too short or too long', () => {
+    expect(isSimpleValidPhone('123456')).toBe(false)
+    expect(isSimpleValidPhone('1234567890123456')).toBe(false)
+  })
+
+  it('accepts numbers with separators (spaces, dashes, dots, parentheses)', () => {
+    expect(isSimpleValidPhone('(731) 123-9702')).toBe(true)
+    expect(isSimpleValidPhone('063.430.8860')).toBe(true)
+    expect(isSimpleValidPhone('272.441.0955')).toBe(true)
+    expect(isSimpleValidPhone('414-902-6626')).toBe(true)
+  })
+
+  it('accepts numbers with extensions at the end', () => {
+    // extension patterns: x123, ext. 9, #456
+    expect(isSimpleValidPhone('+1-280-754-0462x2154')).toBe(true)
+    expect(isSimpleValidPhone('(816)237-0737x0663')).toBe(true)
+    expect(isSimpleValidPhone('990-054-7491x78196')).toBe(true)
+    expect(isSimpleValidPhone('+1 (415) 555-2671 ext. 123')).toBe(true)
+    expect(isSimpleValidPhone('235-396-3701 #802')).toBe(true)
+  })
+
+  it('accepts international dialing prefixes and plus sign', () => {
+    // 00/011 → treated as + (internally by the function)
+    expect(isSimpleValidPhone('001-464-312-8555')).toBe(true)
+    expect(isSimpleValidPhone('011 415 555 2671')).toBe(true)
+    expect(isSimpleValidPhone('+1-444-818-4212')).toBe(true)
+    expect(isSimpleValidPhone('+1-076-096-4074x6140')).toBe(true)
+  })
+  
+  it('rejects obvious junk', () => {
+    expect(isSimpleValidPhone('hello world')).toBe(false)
+    expect(isSimpleValidPhone('(+1) ABC-DEFG')).toBe(false)
+    expect(isSimpleValidPhone('+++++++')).toBe(false)
+  })
+
+  it('rejects multiple plus signs in body once normalized', () => {
+    // After cleaning we allow only one leading '+'
+    expect(isSimpleValidPhone('++1-415-555-2671')).toBe(false)
+    expect(isSimpleValidPhone('+1+4155552671')).toBe(false)
+  })
+
+  it('preserves acceptance of leading zeros for national formats', () => {
+    expect(isSimpleValidPhone('059-372-5255')).toBe(true)
+    expect(isSimpleValidPhone('063.430.8860x4762')).toBe(true)
   })
 })
 
