@@ -9,7 +9,7 @@ const availableFields = [
   { field: 'countryCode', label: 'Country Code' },
   { field: 'phoneNumber', label: 'Phone Number' },
   { field: 'yearsInRole', label: 'Years In Role' },
-  { field: 'linkedin', label: 'Linkedin' },
+  { field: 'linkedinProfile', label: 'Linkedin' },
 ]
 
 type MessageTemplateModalFieldsDropdownProps = {

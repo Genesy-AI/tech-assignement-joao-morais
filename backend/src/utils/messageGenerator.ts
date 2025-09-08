@@ -7,7 +7,7 @@ export interface Lead {
   countryCode?: string | null
   phoneNumber?: string | null
   yearsInRole?: string | null
-  linkedin?: string | null
+  linkedinProfile?: string | null
 }
 
 export function generateMessageFromTemplate(template: string, lead: Lead): string {
@@ -21,7 +21,7 @@ export function generateMessageFromTemplate(template: string, lead: Lead): strin
     countryCode: lead.countryCode,
     phoneNumber: lead.phoneNumber,
     yearsInRole: lead.yearsInRole,
-    linkedin: lead.linkedin,
+    linkedinProfile: lead.linkedinProfile,
   }
 
   const templateVariables = template.match(/\{(\w+)\}/g) || []

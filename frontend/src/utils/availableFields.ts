@@ -1,3 +1,20 @@
+import { Lead } from "../api/types/leads/getMany"
+
+export type EnrichedLead = {
+  id: number
+  createdAt: string
+  updatedAt: string
+  completeName: string
+  email: string | null
+  jobTitle: string | null
+  countryCode: string | null
+  companyName: string | null
+  phoneNumber: string | null
+  yearsInRole: string | null
+  linkedinProfile: string | null
+  message: string | null
+}
+
 export const availableFields = {
   keys: [
     'completeName',
@@ -33,7 +50,7 @@ const formatDate = (dateString: string) => {
   })
 }
 
-export const enrichLead = (lead: any) => ({
+export const enrichLead = (lead: Lead): EnrichedLead => ({
   id: lead.id,
   completeName: `${lead.firstName} ${lead.lastName ?? ''}`,
   email: lead.email,
@@ -45,4 +62,5 @@ export const enrichLead = (lead: any) => ({
   yearsInRole: lead.yearsInRole,
   linkedinProfile: lead.linkedinProfile,
   createdAt: formatDate(lead.createdAt),
+  updatedAt: lead.updatedAt
 })

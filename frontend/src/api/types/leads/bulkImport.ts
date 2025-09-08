@@ -15,7 +15,12 @@ export interface LeadsBulkImportOutput {
   success: boolean
   importedCount: number
   duplicatesSkipped: number
+  processed: number
+  createdCount: number
+  updatedCount: number
   invalidLeads: number
+  duplicatesInUpload: number
+  ambiguousNameConflicts: number
   errors: Array<{
     lead: any
     error: string

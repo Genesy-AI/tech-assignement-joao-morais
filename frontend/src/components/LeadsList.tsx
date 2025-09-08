@@ -4,7 +4,8 @@ import toast from 'react-hot-toast'
 import { api } from '../api'
 import { MessageTemplateModal } from './MessageTemplateModal'
 import { CsvImportModal } from './CsvImportModal'
-import { availableFields, enrichLead } from '../utils/availableFields'
+import { availableFields, EnrichedLead, enrichLead } from '../utils/availableFields'
+import { Lead } from '../api/types/leads/getMany'
 
 const { keys: fieldsKeys, labels: fieldsLabels } = availableFields
 
@@ -22,7 +23,7 @@ export const LeadsList: FC = () => {
   })
 
   const enrichedLeads = useMemo(() => {
-    return leads?.data?.map((item: any) => enrichLead(item))
+    return leads?.data?.map((item: Lead) => enrichLead(item))
   }, [leads])
 
   const deleteLeadsMutation = useMutation({
@@ -259,7 +260,7 @@ export const LeadsList: FC = () => {
                   <input
                     type="checkbox"
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    checked={isAllSelected}
+                    checked={!!isAllSelected}
                     ref={(el) => {
                       if (el) el.indeterminate = isIndeterminate
                     }}
@@ -296,7 +297,9 @@ export const LeadsList: FC = () => {
                     </td>
                     {fieldsKeys.map((key) => (
                       <td className="px-6 py-4 whitespace-nowrap" key={key}>
-                        <div className="text-sm font-medium text-gray-900">{lead[key] ?? '-'}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {lead[key as keyof EnrichedLead] ?? '-'}
+                        </div>
                       </td>
                     ))}
                   </tr>

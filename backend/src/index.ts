@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import express, { Request, Response } from 'express'
+import { bulkCreateOrUpdateByName } from './utils/bulkCreateOrUpdateByName'
 import { generateMessageFromTemplate } from './utils/messageGenerator'
 const prisma = new PrismaClient()
 const app = express()
@@ -170,105 +171,12 @@ app.post('/leads/bulk', async (req: Request, res: Response) => {
 
   const { leads } = req.body
 
-  if (!Array.isArray(leads) || leads.length === 0) {
-    return res.status(400).json({ error: 'leads must be a non-empty array' })
-  }
-
   try {
-    const validLeads = leads.filter((lead) => {
-      return (
-        lead.firstName &&
-        lead.lastName &&
-        lead.email &&
-        typeof lead.firstName === 'string' &&
-        lead.firstName.trim() &&
-        typeof lead.lastName === 'string' &&
-        lead.lastName.trim() &&
-        typeof lead.email === 'string' &&
-        lead.email.trim()
-      )
-    })
-    if (validLeads.length === 0) {
-      return res
-        .status(400)
-        .json({ error: 'No valid leads found. firstName, lastName, and email are required.' })
-    }
-
-    const existingLeads = await prisma.lead.findMany({
-      where: {
-        OR: validLeads.map((lead) => ({
-          AND: [{ firstName: lead.firstName.trim() }, { lastName: lead.lastName.trim() }],
-        })),
-      },
-    })
-    const leadKeys = new Set(
-      existingLeads.map((lead) => `${lead.firstName.toLowerCase()}_${(lead.lastName || '').toLowerCase()}`)
-    )
-
-    const uniqueLeads = validLeads.filter((lead) => {
-      const key = `${lead.firstName.toLowerCase()}_${lead.lastName.toLowerCase()}`
-      return !leadKeys.has(key)
-    })
-
-    let importedCount = 0
-    const errors: Array<{ lead: any; error: string }> = []
-
-    for (const lead of uniqueLeads) {
-      try {
-        await prisma.lead.create({
-          data: {
-            firstName: lead.firstName.trim(),
-            lastName: lead.lastName.trim(),
-            email: lead.email.trim(),
-            jobTitle: lead.jobTitle ? lead.jobTitle.trim() : null,
-            countryCode: lead.countryCode ? lead.countryCode.trim() : null,
-            companyName: lead.companyName ? lead.companyName.trim() : null,
-            phoneNumber: lead.phoneNumber ? lead.phoneNumber.trim() : null,
-            yearsInRole: lead.yearsInRole ? lead.yearsInRole.trim() : null,
-          },
-        })
-        importedCount++
-      } catch (error) {
-        errors.push({
-          lead: lead,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      }
-    }
-
-    // for (const lead of existingLeads) {
-    //   try {
-    //     await prisma.lead.update({
-    //       where: { id: lead.id },
-    //       data: {
-    //         firstName: lead.firstName.trim(),
-    //         lastName: lead.lastName.trim(),
-    //         email: lead.email.trim(),
-    //         jobTitle: lead.jobTitle ? lead.jobTitle.trim() : null,
-    //         countryCode: lead.countryCode ? lead.countryCode.trim() : null,
-    //         companyName: lead.companyName ? lead.companyName.trim() : null,
-    //         phoneNumber: lead.phoneNumber ? lead.phoneNumber.trim() : null,
-    //         yearsInRole: lead.yearsInRole ? lead.yearsInRole.trim() : null,
-    //       },
-    //     })
-    //   } catch (error) {
-    //     errors.push({
-    //       lead: lead,
-    //       error: error instanceof Error ? error.message : 'Unknown error',
-    //     })
-    //   }
-    // }
-
-    res.json({
-      success: true,
-      importedCount,
-      duplicatesSkipped: validLeads.length - uniqueLeads.length,
-      invalidLeads: leads.length - validLeads.length,
-      errors,
-    })
-  } catch (error) {
-    console.error('Error importing leads:', error)
-    res.status(500).json({ error: 'Failed to import leads' })
+    const result = await bulkCreateOrUpdateByName(prisma, leads)
+    return res.status(result.status).json(result.body)
+  } catch (err) {
+    console.error('Error importing leads:', err)
+    return res.status(500).json({ error: 'Failed to import leads' })
   }
 })
 

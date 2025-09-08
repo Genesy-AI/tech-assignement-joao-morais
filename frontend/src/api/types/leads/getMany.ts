@@ -1,6 +1,6 @@
 export type LeadsGetManyInput = undefined
 
-export type LeadsGetManyOutput = {
+export type Lead = {
   id: number
   createdAt: string
   updatedAt: string
@@ -12,5 +12,8 @@ export type LeadsGetManyOutput = {
   companyName: string | null
   phoneNumber: string | null
   yearsInRole: string | null
+  linkedinProfile: string | null
   message: string | null
-}[]
+}
+
+export type LeadsGetManyOutput = Lead[]
