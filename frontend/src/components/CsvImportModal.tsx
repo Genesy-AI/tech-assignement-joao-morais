@@ -4,20 +4,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { api } from '../api'
 import { CsvLead, parseCsv } from '../utils/csvParser'
-import { availableFields, enrichLead } from '../utils/availableFields'
+import { csvImportFields, enrichLead } from '../utils/availableFields'
 
-const { keys: fieldsKeys, labels: fieldsLabels } = availableFields
+const { keys: fieldsKeys, labels: fieldsLabels } = csvImportFields
 
-const csvImportModalTableLabels = [
-  'Row',
-  'Status',
-  ...fieldsLabels.filter((item) => item !== 'Message' && item !== 'Created'),
-  'Errors',
-]
-const csvImportModalTableKeys = [
-  ...fieldsKeys.filter((item) => item !== 'message' && item !== 'createdAt'),
-  'errors',
-]
 
 interface CsvImportModalProps {
   isOpen: boolean
@@ -56,7 +46,10 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
     }
   }, [csvData])
 
-  const enrichedCsvData = useMemo(() => csvData.map((item) => ({ ...item, ...enrichLead(item) })), [csvData])
+  const enrichedCsvData = useMemo(
+    () => csvData.map((item) => ({ ...item, errors: item.errors.join(', '), ...enrichLead(item) })),
+    [csvData]
+  )
 
   const handleFileSelect = (file: File) => {
     if (!file.name.endsWith('.csv')) {
@@ -124,20 +117,20 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['leads', 'getMany'] })
-      
-      const created   = data.createdCount ?? data.importedCount ?? 0;
-      const updated   = data.updatedCount ?? 0;
-      const invalid   = data.invalidLeads ?? 0;
-      const duplicates= data.duplicatesInUpload ?? data.duplicatesSkipped ?? 0;
-      const conflicts = data.ambiguousNameConflicts ?? 0;
-      const failed    = data.errors?.length ?? 0;
 
-      let message = `Import finished: ${created} created`;
-      if (updated)   message += `, ${updated} updated`;
-      if (duplicates)message += ` (${duplicates} duplicates skipped)`;
-      if (invalid)   message += ` (${invalid} invalid leads excluded)`;
-      if (conflicts) message += ` (${conflicts} name conflicts)`;
-      if (failed)    message += ` (${failed} failed)`;
+      const created = data.createdCount ?? data.importedCount ?? 0
+      const updated = data.updatedCount ?? 0
+      const invalid = data.invalidLeads ?? 0
+      const duplicates = data.duplicatesInUpload ?? data.duplicatesSkipped ?? 0
+      const conflicts = data.ambiguousNameConflicts ?? 0
+      const failed = data.errors?.length ?? 0
+
+      let message = `Import finished: ${created} created`
+      if (updated) message += `, ${updated} updated`
+      if (duplicates) message += ` (${duplicates} duplicates skipped)`
+      if (invalid) message += ` (${invalid} invalid leads excluded)`
+      if (conflicts) message += ` (${conflicts} name conflicts)`
+      if (failed) message += ` (${failed} failed)`
       if (data.duplicatesSkipped > 0) {
         message += ` (${data.duplicatesSkipped} duplicates skipped)`
       }
@@ -301,7 +294,7 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50 sticky top-0">
                     <tr>
-                      {csvImportModalTableLabels.map((label) => (
+                      {fieldsLabels.map((label) => (
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
                           {label}
                         </th>
@@ -323,8 +316,10 @@ export const CsvImportModal: FC<CsvImportModalProps> = ({ isOpen, onClose }) => 
                             </span>
                           )}
                         </td>
-                        {csvImportModalTableKeys.map((key) => (
-                          <td className="px-3 py-2 text-sm text-gray-900 whitespace-nowrap">{lead[key as keyof CsvLead] || '-'}</td>
+                        {fieldsKeys.map((key) => (
+                          <td className="px-3 py-2 text-sm text-gray-900 whitespace-nowrap">
+                            {lead[key as keyof CsvLead] || '-'}
+                          </td>
                         ))}
                       </tr>
                     ))}

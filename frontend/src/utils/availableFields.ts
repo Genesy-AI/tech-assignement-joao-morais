@@ -1,7 +1,7 @@
-import { Lead } from "../api/types/leads/getMany"
+import { Lead } from '../api/types/leads/getMany'
 
 export type EnrichedLead = {
-  id: number
+  id?: number
   createdAt: string
   updatedAt: string
   completeName: string
@@ -12,32 +12,45 @@ export type EnrichedLead = {
   phoneNumber: string | null
   yearsInRole: string | null
   linkedinProfile: string | null
-  message: string | null
+  message?: string | null
+}
+
+const DEFAULT_LABELS = [
+  'Name',
+  'Email',
+  'Job Title',
+  'Company',
+  'Country',
+  'Phone Number',
+  'Years at Company',
+  'Linkedin',
+]
+
+const DEFAULT_KEYS = [
+  'completeName',
+  'email',
+  'jobTitle',
+  'companyName',
+  'countryCode',
+  'phoneNumber',
+  'yearsInRole',
+  'linkedinProfile',
+]
+
+export const csvImportFields = {
+  keys: [...DEFAULT_KEYS, 'errors'],
+  labels: ['Row', 'Status', ...DEFAULT_LABELS, 'Errors'],
 }
 
 export const availableFields = {
   keys: [
-    'completeName',
-    'email',
-    'jobTitle',
-    'companyName',
-    'countryCode',
+    ...DEFAULT_KEYS,
     'message',
-    'phoneNumber',
-    'yearsInRole',
-    'linkedinProfile',
     'createdAt',
   ],
   labels: [
-    'Name',
-    'Email',
-    'Job Title',
-    'Company',
-    'Country',
+    ...DEFAULT_LABELS,
     'Message',
-    'Phone Number',
-    'Years at Company',
-    'Linkedin',
     'Created',
   ],
 }
@@ -54,13 +67,13 @@ export const enrichLead = (lead: Lead): EnrichedLead => ({
   id: lead.id,
   completeName: `${lead.firstName} ${lead.lastName ?? ''}`,
   email: lead.email,
-  jobTitle: lead.jobTitle,
-  companyName: lead.companyName,
-  countryCode: lead.countryCode,
+  jobTitle: lead.jobTitle || null,
+  companyName: lead.companyName || null,
+  countryCode: lead.countryCode || null,
   message: lead.message,
-  phoneNumber: lead.phoneNumber,
-  yearsInRole: lead.yearsInRole,
-  linkedinProfile: lead.linkedinProfile,
-  createdAt: formatDate(lead.createdAt),
-  updatedAt: lead.updatedAt
+  phoneNumber: lead.phoneNumber || null,
+  yearsInRole: lead.yearsInRole || null,
+  linkedinProfile: lead.linkedinProfile || null,
+  createdAt: lead.createdAt ? formatDate(lead.createdAt) : '',
+  updatedAt: lead.updatedAt || '',
 })
