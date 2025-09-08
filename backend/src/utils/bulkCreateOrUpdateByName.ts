@@ -12,10 +12,10 @@ export type IncomingLead = {
   linkedinProfile?: string | null
 }
 
-type LeadCreateData = Prisma.leadCreateArgs['data'];
-type LeadUpdateData = Prisma.leadUpdateArgs['data'];
+type LeadCreateData = Prisma.leadCreateArgs['data']
+type LeadUpdateData = Prisma.leadUpdateArgs['data']
 
-type ImportError = { lead: IncomingLead | LeadCreateData | null; error: string };
+type ImportError = { lead: IncomingLead | LeadCreateData | null; error: string }
 
 const sanitize = (s?: string | null) => (typeof s === 'string' ? s.trim() || null : null)
 
@@ -66,7 +66,7 @@ const buildUpdateData = (lead: IncomingLead): LeadUpdateData => ({
 })
 
 export async function bulkCreateOrUpdateByName(prisma: PrismaClient, leads: unknown) {
-  // 1) validate payload shape
+  // validate payload shape
   if (!Array.isArray(leads) || leads.length === 0) {
     return { status: 400 as const, body: { error: 'leads must be a non-empty array' } }
   }
@@ -79,11 +79,11 @@ export async function bulkCreateOrUpdateByName(prisma: PrismaClient, leads: unkn
     }
   }
 
-  // 2) dedupe current upload
+  // dedupe current upload
   const { deduped, duplicatesInUpload } = dedupeByKey(validLeads)
 
-  // 3) fetch existing rows that match (firstName,lastName)
-  const existing = await prisma.lead.findMany({
+  // fetch existing rows that match (firstName,lastName)
+  const existingLeads = await prisma.lead.findMany({
     where: {
       OR: deduped.map((l) => ({
         AND: [{ firstName: l.firstName.trim() }, { lastName: l.lastName.trim() }],
@@ -92,28 +92,28 @@ export async function bulkCreateOrUpdateByName(prisma: PrismaClient, leads: unkn
     select: { id: true, firstName: true, lastName: true }, // id is number
   })
 
-  // 4) index existing and detect ambiguous keys
+  // index existing and detect ambiguous keys
   const existingByKey = new Map<string, { id: number; firstName: string; lastName: string }>()
   const ambiguousKeys = new Set<string>()
 
-  for (const e of existing) {
-    const k = keyOf(e)
-    if (existingByKey.has(k)) ambiguousKeys.add(k)
-    else existingByKey.set(k, e)
+  for (const existingLead of existingLeads) {
+    const leadKey = keyOf(existingLead)
+    if (existingByKey.has(leadKey)) ambiguousKeys.add(leadKey)
+    else existingByKey.set(leadKey, existingLead)
   }
 
-  // 5) partition
+  // partition
   const toCreate: LeadCreateData[] = []
   const toUpdate: Array<{ id: number; data: LeadUpdateData; lead: IncomingLead }> = []
   const errors: ImportError[] = []
 
   for (const lead of deduped) {
-    const k = keyOf(lead)
-    if (ambiguousKeys.has(k)) {
+    const leadKey = keyOf(lead)
+    if (ambiguousKeys.has(leadKey)) {
       errors.push({ lead, error: 'Ambiguous match for firstName+lastName; multiple existing entries.' })
       continue
     }
-    const found = existingByKey.get(k)
+    const found = existingByKey.get(leadKey)
     if (found) {
       toUpdate.push({ id: found.id, data: buildUpdateData(lead), lead })
     } else {
@@ -121,7 +121,7 @@ export async function bulkCreateOrUpdateByName(prisma: PrismaClient, leads: unkn
     }
   }
 
-  // 6) execute ops in parallel (no $transaction)
+  // execute ops in parallel (no $transaction)
   type OpResult =
     | { ok: true; kind: 'create' | 'update' }
     | { ok: false; kind: 'create' | 'update'; error: string; lead: any }
@@ -155,12 +155,12 @@ export async function bulkCreateOrUpdateByName(prisma: PrismaClient, leads: unkn
   let createdCount = 0
   let updatedCount = 0
 
-  for (const r of results) {
-    if (r.status === 'fulfilled') {
-      const v = r.value
-      if (v.ok && v.kind === 'create') createdCount += 1
-      if (v.ok && v.kind === 'update') updatedCount += 1
-      if (!v.ok) errors.push({ lead: v.lead, error: v.error })
+  for (const result of results) {
+    if (result.status === 'fulfilled') {
+      const resultValue = result.value
+      if (resultValue.ok && resultValue.kind === 'create') createdCount += 1
+      if (resultValue.ok && resultValue.kind === 'update') updatedCount += 1
+      if (!resultValue.ok) errors.push({ lead: resultValue.lead, error: resultValue.error })
     } else {
       // extremely rare (promise rejected outside our catch)
       // we can’t know if it was create or update; log and keep going
