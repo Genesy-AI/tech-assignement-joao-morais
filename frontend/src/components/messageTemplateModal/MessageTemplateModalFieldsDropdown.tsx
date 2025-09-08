@@ -55,7 +55,7 @@ export const MessageTemplateModalFieldsDropdown = ({
       <div
         className={`${
           open ? '' : 'hidden'
-        } absolute right-0 w-56 mt-2 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg outline-none z-[9999] max-h-60 overflow-y-auto`}
+        } absolute right-0 w-74 mt-2 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg outline-none z-[9999] max-h-60 overflow-y-auto`}
         role="menu"
         aria-label="Insert field"
       >
