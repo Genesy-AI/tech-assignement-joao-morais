@@ -1,4 +1,4 @@
-# IMPROVEMENTS.md
+# IMPROVEMENTS
 
 This document summarizes areas of improvement identified during the test project.  
 The goal is to prioritize actionable changes, highlight potential risks, and suggest opportunities for better UX and developer experience.  
