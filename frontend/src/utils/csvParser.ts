@@ -19,10 +19,18 @@ export const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
 }
-// This ensures correct format.
-// For production, I’d use a library like i18n-iso-countries to validate against the actual ISO 3166 list.
+// Validates a country code against the browser's built-in Intl CLDR data.
+// Returns true only if the code is recognized as an ISO 3166 region.
+// Note: For guaranteed consistency across environments (e.g. Node.js),
+// consider using a library like i18n-iso-countries.
 export function isValidCountryCodeFormat(code: string) {
-  return /^[A-Z]{2}$/.test(code)
+  try {
+    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' })
+    const name = regionNames.of(code.toUpperCase())
+    return name !== undefined
+  } catch {
+    return false
+  }
 }
 
 export const parseCsv = (content: string): CsvLead[] => {

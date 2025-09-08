@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseCsv, isValidEmail } from './csvParser'
+import { parseCsv, isValidEmail, isValidCountryCodeFormat } from './csvParser'
 
 describe('isValidEmail', () => {
   it('should return true for valid email addresses', () => {
@@ -17,6 +17,31 @@ describe('isValidEmail', () => {
     expect(isValidEmail('test.example.com')).toBe(false)
     expect(isValidEmail('test@.com')).toBe(false)
     expect(isValidEmail('test@example')).toBe(false)
+  })
+})
+
+describe('isValidCountryCodeFormat', () => {
+  it('should return true for valid ISO country codes', () => {
+    expect(isValidCountryCodeFormat('US')).toBe(true)   // United States
+    expect(isValidCountryCodeFormat('BR')).toBe(true)   // Brazil
+    expect(isValidCountryCodeFormat('DE')).toBe(true)   // Germany
+    expect(isValidCountryCodeFormat('JP')).toBe(true)   // Japan
+    expect(isValidCountryCodeFormat('IN')).toBe(true)   // India
+  })
+
+  it('should be case-insensitive and normalize to uppercase', () => {
+    expect(isValidCountryCodeFormat('us')).toBe(true)
+    expect(isValidCountryCodeFormat('br')).toBe(true)
+    expect(isValidCountryCodeFormat('dE')).toBe(true)
+  })
+
+  it('should return false for invalid codes', () => {
+    expect(isValidCountryCodeFormat('')).toBe(false)       // empty string
+    expect(isValidCountryCodeFormat('U')).toBe(false)      // single letter
+    expect(isValidCountryCodeFormat('USA')).toBe(false)    // three letters
+    expect(isValidCountryCodeFormat('ZZ')).toBe(false)     // not an assigned region
+    expect(isValidCountryCodeFormat('123')).toBe(false)    // numbers
+    expect(isValidCountryCodeFormat('@@')).toBe(false)     // special chars
   })
 })
 
